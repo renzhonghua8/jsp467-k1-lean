@@ -25,10 +25,11 @@ jobs:
         with:
           build: true
           use-mathlib-cache: true
+          use-github-cache: false
           leanchecker: true
           leanchecker-args: Jsp467
           axiom-audit: true
-          axiom-audit-root: Erdos577
+          axiom-audit-root: Jsp467
       - name: Print theorem axiom report
         run: lake env lean Jsp467/Audit.lean
       - name: Reject placeholders and custom axioms

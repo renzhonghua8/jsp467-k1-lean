@@ -62,34 +62,34 @@ theorem erdos_577_k_one (G : SimpleGraph (Fin 4))
   · by_cases h23 : G.Adj 2 3
     · by_cases h02 : G.Adj 0 2
       · by_cases h13 : G.Adj 1 3
-        · refine ⟨0, 2, 3, 1, by decide, by decide, by decide, by decide, by decide,
-            by decide, h02, h23, h13.symm, h01.symm⟩
-        · have h12 := (adj_both_of_not_adj G hdegree 1 3 0 2 (by decide) hall13 h13).2
-          have h30 := (adj_both_of_not_adj G hdegree 3 1 0 2 (by decide) hall31
+        · refine ⟨0, 2, 3, 1, by omega, by omega, by omega, by omega, by omega,
+            by omega, h02, h23, h13.symm, h01.symm⟩
+        · have h12 := (adj_both_of_not_adj G hdegree 1 3 0 2 (by omega) hall13 h13).2
+          have h30 := (adj_both_of_not_adj G hdegree 3 1 0 2 (by omega) hall31
             (fun h31 ↦ h13 h31.symm)).1
-          refine ⟨0, 1, 2, 3, by decide, by decide, by decide, by decide, by decide,
-            by decide, h01, h12, h23, h30⟩
-      · have h03 := (adj_both_of_not_adj G hdegree 0 2 1 3 (by decide) hall02 h02).2
-        have h21 := (adj_both_of_not_adj G hdegree 2 0 1 3 (by decide) hall20
+          refine ⟨0, 1, 2, 3, by omega, by omega, by omega, by omega, by omega,
+            by omega, h01, h12, h23, h30⟩
+      · have h03 := (adj_both_of_not_adj G hdegree 0 2 1 3 (by omega) hall02 h02).2
+        have h21 := (adj_both_of_not_adj G hdegree 2 0 1 3 (by omega) hall20
           (fun h20 ↦ h02 h20.symm)).1
-        refine ⟨0, 3, 2, 1, by decide, by decide, by decide, by decide, by decide,
-          by decide, h03, h23.symm, h21, h01.symm⟩
-    · have h20 := (adj_both_of_not_adj G hdegree 2 3 0 1 (by decide) hall23 h23).1
-      have h21 := (adj_both_of_not_adj G hdegree 2 3 0 1 (by decide) hall23 h23).2
-      have h31 := (adj_both_of_not_adj G hdegree 3 2 0 1 (by decide) hall32
+        refine ⟨0, 3, 2, 1, by omega, by omega, by omega, by omega, by omega,
+          by omega, h03, h23.symm, h21, h01.symm⟩
+    · have h20 := (adj_both_of_not_adj G hdegree 2 3 0 1 (by omega) hall23 h23).1
+      have h21 := (adj_both_of_not_adj G hdegree 2 3 0 1 (by omega) hall23 h23).2
+      have h31 := (adj_both_of_not_adj G hdegree 3 2 0 1 (by omega) hall32
         (fun h32 ↦ h23 h32.symm)).2
-      refine ⟨0, 2, 1, 3, by decide, by decide, by decide, by decide, by decide,
-        by decide, h20.symm, h21, h31.symm, ?_⟩
-      exact (adj_both_of_not_adj G hdegree 3 2 0 1 (by decide) hall32
+      refine ⟨0, 2, 1, 3, by omega, by omega, by omega, by omega, by omega,
+        by omega, h20.symm, h21, h31.symm, ?_⟩
+      exact (adj_both_of_not_adj G hdegree 3 2 0 1 (by omega) hall32
         (fun h32 ↦ h23 h32.symm)).1
-  · have h02 := (adj_both_of_not_adj G hdegree 0 1 2 3 (by decide) hall01 h01).1
-    have h21 := (adj_both_of_not_adj G hdegree 1 0 2 3 (by decide) hall10
+  · have h02 := (adj_both_of_not_adj G hdegree 0 1 2 3 (by omega) hall01 h01).1
+    have h21 := (adj_both_of_not_adj G hdegree 1 0 2 3 (by omega) hall10
       (fun h10 ↦ h01 h10.symm)).1
-    have h13 := (adj_both_of_not_adj G hdegree 1 0 2 3 (by decide) hall10
+    have h13 := (adj_both_of_not_adj G hdegree 1 0 2 3 (by omega) hall10
       (fun h10 ↦ h01 h10.symm)).2
-    have h30 := (adj_both_of_not_adj G hdegree 0 1 2 3 (by decide) hall01 h01).2
-    refine ⟨0, 2, 1, 3, by decide, by decide, by decide, by decide, by decide,
-      by decide, h02, h21.symm, h13, h30.symm⟩
+    have h30 := (adj_both_of_not_adj G hdegree 0 1 2 3 (by omega) hall01 h01).2
+    refine ⟨0, 2, 1, 3, by omega, by omega, by omega, by omega, by omega,
+      by omega, h02, h21.symm, h13, h30.symm⟩
 
 /-- Walk/cycle API form of the same result. -/
 theorem erdos_577_k_one_cycle (G : SimpleGraph (Fin 4))
