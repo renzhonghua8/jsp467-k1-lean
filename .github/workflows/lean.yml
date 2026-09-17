@@ -1,0 +1,21 @@
+name: Lean verification
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          build: true
+          use-mathlib-cache: true
+      - name: Reject placeholders and custom axioms
+        run: |
+          ! grep -RInE '(^|[^[:alnum:]_])(sorry|admit|axiom)([^[:alnum:]_]|$)' Jsp467 --include='*.lean'
