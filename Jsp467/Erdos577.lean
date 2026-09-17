@@ -29,28 +29,27 @@ def ContainsC4 {V : Type*} (G : SimpleGraph V) : Prop :=
 /-- On four named vertices, if one is not adjacent to another and has degree
 at least two, it is adjacent to both remaining vertices. -/
 private lemma adj_both_of_not_adj
-    (G : SimpleGraph (Fin 4)) (hdegree : ∀ v, 2 ≤ G.degree v)
+    (G : SimpleGraph (Fin 4)) (hdegree : ∀ v, 2 ≤ (G.neighborSet v).ncard)
     (v w x y : Fin 4) (hxy : x ≠ y)
     (hall : ∀ z, z = v ∨ z = w ∨ z = x ∨ z = y)
     (hvw : ¬ G.Adj v w) : G.Adj v x ∧ G.Adj v y := by
-  classical
-  have hsubset : G.neighborFinset v ⊆ {x, y} := by
+  have hsubset : G.neighborSet v ⊆ {x, y} := by
     intro z hz
-    have hvz : G.Adj v z := (G.mem_neighborFinset v z).mp hz
+    have hvz : G.Adj v z := (G.mem_neighborSet v z).mp hz
     rcases hall z with rfl | rfl | rfl | rfl
     · exact (G.irrefl hvz).elim
     · exact (hvw hvz).elim
     · simp
     · simp
-  have hcard : #({x, y} : Finset (Fin 4)) ≤ #(G.neighborFinset v) := by
-    simpa [Finset.card_pair hxy] using hdegree v
-  have heq : G.neighborFinset v = {x, y} :=
-    Finset.eq_of_subset_of_card_le hsubset hcard
-  constructor <;> rw [← G.mem_neighborFinset v, heq] <;> simp
+  have hcard : ({x, y} : Set (Fin 4)).ncard ≤ (G.neighborSet v).ncard := by
+    simpa [Set.ncard_pair hxy] using hdegree v
+  have heq : G.neighborSet v = {x, y} :=
+    Set.eq_of_subset_of_ncard_le hsubset hcard
+  constructor <;> rw [← G.mem_neighborSet, heq] <;> simp
 
 /-- The `k = 1` case of Erdős problem 577, as an explicit four-cycle. -/
 theorem erdos_577_k_one (G : SimpleGraph (Fin 4))
-    (hdegree : ∀ v, 2 ≤ G.degree v) : ContainsC4 G := by
+    (hdegree : ∀ v, 2 ≤ (G.neighborSet v).ncard) : ContainsC4 G := by
   have hall01 (z : Fin 4) : z = 0 ∨ z = 1 ∨ z = 2 ∨ z = 3 := by omega
   have hall10 (z : Fin 4) : z = 1 ∨ z = 0 ∨ z = 2 ∨ z = 3 := by omega
   have hall23 (z : Fin 4) : z = 2 ∨ z = 3 ∨ z = 0 ∨ z = 1 := by omega
@@ -94,7 +93,7 @@ theorem erdos_577_k_one (G : SimpleGraph (Fin 4))
 
 /-- Walk/cycle API form of the same result. -/
 theorem erdos_577_k_one_cycle (G : SimpleGraph (Fin 4))
-    (hdegree : ∀ v, 2 ≤ G.degree v) :
+    (hdegree : ∀ v, 2 ≤ (G.neighborSet v).ncard) :
     ∃ (v : Fin 4) (p : G.Walk v v), p.IsCycle ∧ p.length = 4 := by
   rcases erdos_577_k_one G hdegree with
     ⟨a, b, c, d, hab, hac, had, hbc, hbd, hcd, eab, ebc, ecd, eda⟩
@@ -104,12 +103,13 @@ theorem erdos_577_k_one_cycle (G : SimpleGraph (Fin 4))
   rw [SimpleGraph.Walk.isCycle_iff_isPath_tail_and_le_length]
   constructor
   · rw [SimpleGraph.Walk.isPath_def]
-    simp [p, hab, hac, had, hbc, hbd, hcd]
+    simpa [p] using
+      (show ¬b = a ∧ ¬c = a ∧ ¬d = a from ⟨hab.symm, hac.symm, had.symm⟩)
   · simp [p]
 
 /-- Canonical containment form: `G` contains a copy of `C₄`. -/
 theorem erdos_577_k_one_contains_cycleGraph (G : SimpleGraph (Fin 4))
-    (hdegree : ∀ v, 2 ≤ G.degree v) : cycleGraph 4 ⊑ G := by
+    (hdegree : ∀ v, 2 ≤ (G.neighborSet v).ncard) : cycleGraph 4 ⊑ G := by
   rw [cycleGraph_isContained_iff (by omega)]
   exact erdos_577_k_one_cycle G hdegree
 

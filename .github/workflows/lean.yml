@@ -20,9 +20,15 @@ jobs:
       - name: Resolve pinned dependencies
         run: "$HOME/.elan/bin/lake update"
       - uses: leanprover/lean-action@v1
+        env:
+          LEAN_NUM_THREADS: "1"
         with:
           build: true
           use-mathlib-cache: true
+          leanchecker: true
+          leanchecker-args: Jsp467
+          axiom-audit: true
+          axiom-audit-root: Erdos577
       - name: Print theorem axiom report
         run: lake env lean Jsp467/Audit.lean
       - name: Reject placeholders and custom axioms
