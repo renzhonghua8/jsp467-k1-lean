@@ -1,13 +1,19 @@
+import Mathlib.Combinatorics.SimpleGraph.CycleGraph
 import Mathlib.Combinatorics.SimpleGraph.Finite
-import Mathlib.Tactic
 
 /-!
 # Erdős problem 577: the case `k = 1`
 
 Hong Wang proved that every graph on `4 * k` vertices whose minimum degree is
-at least `2 * k` contains `k` vertex-disjoint four-cycles.  This file proves
+at least `2 * k` contains `k` vertex-disjoint four-cycles. This file proves
 the exact first case: every simple graph on four vertices with minimum degree
 at least two contains a four-cycle.
+
+References:
+* [The Justin Sun Prize, JSP-000467](https://github.com/TheJustinSunPrize/awards/blob/main/problems/catalog-0401-0500.md#JSP-000467)
+* [Erdős problem 577](https://www.erdosproblems.com/577)
+* H. Wang, *Proof of the Erdős-Faudree conjecture on quadrilaterals*,
+  Graphs and Combinatorics (2010), 833–877.
 -/
 
 open SimpleGraph
@@ -15,85 +21,96 @@ open SimpleGraph
 namespace Erdos577
 
 /-- Four pairwise distinct vertices occurring cyclically in `G`. -/
-def ContainsC4 (G : SimpleGraph (Fin 4)) : Prop :=
-  ∃ a b c d : Fin 4,
+def ContainsC4 {V : Type*} (G : SimpleGraph V) : Prop :=
+  ∃ a b c d : V,
     a ≠ b ∧ a ≠ c ∧ a ≠ d ∧ b ≠ c ∧ b ≠ d ∧ c ≠ d ∧
       G.Adj a b ∧ G.Adj b c ∧ G.Adj c d ∧ G.Adj d a
 
-private lemma adj_pair_of_neighborFinset_subset (G : SimpleGraph (Fin 4))
-    {v x y : Fin 4} (hxy : x ≠ y) (hdegree : 2 ≤ G.degree v)
-    (hsubset : G.neighborFinset v ⊆ {x, y}) : G.Adj v x ∧ G.Adj v y := by
+/-- On four named vertices, if one is not adjacent to another and has degree
+at least two, it is adjacent to both remaining vertices. -/
+private lemma adj_both_of_not_adj
+    (G : SimpleGraph (Fin 4)) (hdegree : ∀ v, 2 ≤ G.degree v)
+    (v w x y : Fin 4) (hxy : x ≠ y)
+    (hall : ∀ z, z = v ∨ z = w ∨ z = x ∨ z = y)
+    (hvw : ¬ G.Adj v w) : G.Adj v x ∧ G.Adj v y := by
+  classical
+  have hsubset : G.neighborFinset v ⊆ {x, y} := by
+    intro z hz
+    have hvz : G.Adj v z := (G.mem_neighborFinset v z).mp hz
+    rcases hall z with rfl | rfl | rfl | rfl
+    · exact (G.irrefl hvz).elim
+    · exact (hvw hvz).elim
+    · simp
+    · simp
   have hcard : #({x, y} : Finset (Fin 4)) ≤ #(G.neighborFinset v) := by
-    simpa [hxy, SimpleGraph.degree] using hdegree
+    simpa [Finset.card_pair hxy] using hdegree v
   have heq : G.neighborFinset v = {x, y} :=
     Finset.eq_of_subset_of_card_le hsubset hcard
-  constructor
-  · rw [← G.mem_neighborFinset v]
-    rw [heq]
-    simp
-  · rw [← G.mem_neighborFinset v]
-    rw [heq]
-    simp
+  constructor <;> rw [← G.mem_neighborFinset v, heq] <;> simp
 
-/-- The `k = 1` case of Erdős problem 577. -/
+/-- The `k = 1` case of Erdős problem 577, as an explicit four-cycle. -/
 theorem erdos_577_k_one (G : SimpleGraph (Fin 4))
     (hdegree : ∀ v, 2 ≤ G.degree v) : ContainsC4 G := by
-  classical
+  have hall01 (z : Fin 4) : z = 0 ∨ z = 1 ∨ z = 2 ∨ z = 3 := by omega
+  have hall10 (z : Fin 4) : z = 1 ∨ z = 0 ∨ z = 2 ∨ z = 3 := by omega
+  have hall23 (z : Fin 4) : z = 2 ∨ z = 3 ∨ z = 0 ∨ z = 1 := by omega
+  have hall32 (z : Fin 4) : z = 3 ∨ z = 2 ∨ z = 0 ∨ z = 1 := by omega
+  have hall02 (z : Fin 4) : z = 0 ∨ z = 2 ∨ z = 1 ∨ z = 3 := by omega
+  have hall20 (z : Fin 4) : z = 2 ∨ z = 0 ∨ z = 1 ∨ z = 3 := by omega
+  have hall13 (z : Fin 4) : z = 1 ∨ z = 3 ∨ z = 0 ∨ z = 2 := by omega
+  have hall31 (z : Fin 4) : z = 3 ∨ z = 1 ∨ z = 0 ∨ z = 2 := by omega
   by_cases h01 : G.Adj 0 1
-  · by_cases h02 : G.Adj 0 2
-    · by_cases h13 : G.Adj 1 3
-      · by_cases h23 : G.Adj 2 3
-        · refine ⟨0, 1, 3, 2, by decide, by decide, by decide,
-            by decide, by decide, by decide, h01, h13, ?_, ?_⟩
-          · exact G.symm h23
-          · exact G.symm h02
-        · have h2 : G.Adj 2 0 ∧ G.Adj 2 1 :=
-            adj_pair_of_neighborFinset_subset G (by decide) (hdegree 2) (by
-              intro z hz
-              have hadj : G.Adj 2 z := (G.mem_neighborFinset 2 z).mp hz
-              fin_cases z <;> simp_all [G.adj_comm])
-          have h3 : G.Adj 3 0 ∧ G.Adj 3 1 :=
-            adj_pair_of_neighborFinset_subset G (by decide) (hdegree 3) (by
-              intro z hz
-              have hadj : G.Adj 3 z := (G.mem_neighborFinset 3 z).mp hz
-              fin_cases z <;> simp_all [G.adj_comm])
-          exact ⟨0, 2, 1, 3, by decide, by decide, by decide,
-            by decide, by decide, by decide, h02, h2.2, h13, h3.1⟩
-      · have h1 : G.Adj 1 0 ∧ G.Adj 1 2 :=
-          adj_pair_of_neighborFinset_subset G (by decide) (hdegree 1) (by
-            intro z hz
-            have hadj : G.Adj 1 z := (G.mem_neighborFinset 1 z).mp hz
-            fin_cases z <;> simp_all [G.adj_comm])
-        have h3 : G.Adj 3 0 ∧ G.Adj 3 2 :=
-          adj_pair_of_neighborFinset_subset G (by decide) (hdegree 3) (by
-            intro z hz
-            have hadj : G.Adj 3 z := (G.mem_neighborFinset 3 z).mp hz
-            fin_cases z <;> simp_all [G.adj_comm])
-        exact ⟨0, 1, 2, 3, by decide, by decide, by decide,
-          by decide, by decide, by decide, h01, h1.2, G.symm h3.2, h3.1⟩
-    · have h0 : G.Adj 0 1 ∧ G.Adj 0 3 :=
-        adj_pair_of_neighborFinset_subset G (by decide) (hdegree 0) (by
-          intro z hz
-          have hadj : G.Adj 0 z := (G.mem_neighborFinset 0 z).mp hz
-          fin_cases z <;> simp_all [G.adj_comm])
-      have h2 : G.Adj 2 1 ∧ G.Adj 2 3 :=
-        adj_pair_of_neighborFinset_subset G (by decide) (hdegree 2) (by
-          intro z hz
-          have hadj : G.Adj 2 z := (G.mem_neighborFinset 2 z).mp hz
-          fin_cases z <;> simp_all [G.adj_comm])
-      exact ⟨0, 1, 2, 3, by decide, by decide, by decide,
-        by decide, by decide, by decide, h01, G.symm h2.1, h2.2, G.symm h0.2⟩
-  · have h0 : G.Adj 0 2 ∧ G.Adj 0 3 :=
-      adj_pair_of_neighborFinset_subset G (by decide) (hdegree 0) (by
-        intro z hz
-        have hadj : G.Adj 0 z := (G.mem_neighborFinset 0 z).mp hz
-        fin_cases z <;> simp_all [G.adj_comm])
-    have h1 : G.Adj 1 2 ∧ G.Adj 1 3 :=
-      adj_pair_of_neighborFinset_subset G (by decide) (hdegree 1) (by
-        intro z hz
-        have hadj : G.Adj 1 z := (G.mem_neighborFinset 1 z).mp hz
-        fin_cases z <;> simp_all [G.adj_comm])
-    exact ⟨0, 2, 1, 3, by decide, by decide, by decide,
-      by decide, by decide, by decide, h0.1, G.symm h1.1, h1.2, G.symm h0.2⟩
+  · by_cases h23 : G.Adj 2 3
+    · by_cases h02 : G.Adj 0 2
+      · by_cases h13 : G.Adj 1 3
+        · refine ⟨0, 2, 3, 1, by decide, by decide, by decide, by decide, by decide,
+            by decide, h02, h23, h13.symm, h01.symm⟩
+        · have h12 := (adj_both_of_not_adj G hdegree 1 3 0 2 (by decide) hall13 h13).2
+          have h30 := (adj_both_of_not_adj G hdegree 3 1 0 2 (by decide) hall31
+            (fun h31 ↦ h13 h31.symm)).1
+          refine ⟨0, 1, 2, 3, by decide, by decide, by decide, by decide, by decide,
+            by decide, h01, h12, h23, h30⟩
+      · have h03 := (adj_both_of_not_adj G hdegree 0 2 1 3 (by decide) hall02 h02).2
+        have h21 := (adj_both_of_not_adj G hdegree 2 0 1 3 (by decide) hall20
+          (fun h20 ↦ h02 h20.symm)).1
+        refine ⟨0, 3, 2, 1, by decide, by decide, by decide, by decide, by decide,
+          by decide, h03, h23.symm, h21, h01.symm⟩
+    · have h20 := (adj_both_of_not_adj G hdegree 2 3 0 1 (by decide) hall23 h23).1
+      have h21 := (adj_both_of_not_adj G hdegree 2 3 0 1 (by decide) hall23 h23).2
+      have h31 := (adj_both_of_not_adj G hdegree 3 2 0 1 (by decide) hall32
+        (fun h32 ↦ h23 h32.symm)).2
+      refine ⟨0, 2, 1, 3, by decide, by decide, by decide, by decide, by decide,
+        by decide, h20.symm, h21, h31.symm, ?_⟩
+      exact (adj_both_of_not_adj G hdegree 3 2 0 1 (by decide) hall32
+        (fun h32 ↦ h23 h32.symm)).1
+  · have h02 := (adj_both_of_not_adj G hdegree 0 1 2 3 (by decide) hall01 h01).1
+    have h21 := (adj_both_of_not_adj G hdegree 1 0 2 3 (by decide) hall10
+      (fun h10 ↦ h01 h10.symm)).1
+    have h13 := (adj_both_of_not_adj G hdegree 1 0 2 3 (by decide) hall10
+      (fun h10 ↦ h01 h10.symm)).2
+    have h30 := (adj_both_of_not_adj G hdegree 0 1 2 3 (by decide) hall01 h01).2
+    refine ⟨0, 2, 1, 3, by decide, by decide, by decide, by decide, by decide,
+      by decide, h02, h21.symm, h13, h30.symm⟩
+
+/-- Walk/cycle API form of the same result. -/
+theorem erdos_577_k_one_cycle (G : SimpleGraph (Fin 4))
+    (hdegree : ∀ v, 2 ≤ G.degree v) :
+    ∃ (v : Fin 4) (p : G.Walk v v), p.IsCycle ∧ p.length = 4 := by
+  rcases erdos_577_k_one G hdegree with
+    ⟨a, b, c, d, hab, hac, had, hbc, hbd, hcd, eab, ebc, ecd, eda⟩
+  let p : G.Walk a a :=
+    .cons eab (.cons ebc (.cons ecd (.cons eda .nil)))
+  refine ⟨a, p, ?_, by simp [p]⟩
+  rw [SimpleGraph.Walk.isCycle_iff_isPath_tail_and_le_length]
+  constructor
+  · rw [SimpleGraph.Walk.isPath_def]
+    simp [p, hab, hac, had, hbc, hbd, hcd]
+  · simp [p]
+
+/-- Canonical containment form: `G` contains a copy of `C₄`. -/
+theorem erdos_577_k_one_contains_cycleGraph (G : SimpleGraph (Fin 4))
+    (hdegree : ∀ v, 2 ≤ G.degree v) : cycleGraph 4 ⊑ G := by
+  rw [cycleGraph_isContained_iff (by omega)]
+  exact erdos_577_k_one_cycle G hdegree
 
 end Erdos577
