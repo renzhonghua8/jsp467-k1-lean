@@ -16,6 +16,8 @@ jobs:
         with:
           build: true
           use-mathlib-cache: true
+      - name: Print theorem axiom report
+        run: lake env lean Jsp467/Audit.lean
       - name: Reject placeholders and custom axioms
         run: |
           ! grep -RInE '(^|[^[:alnum:]_])(sorry|admit|axiom)([^[:alnum:]_]|$)' Jsp467 --include='*.lean'
