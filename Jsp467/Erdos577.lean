@@ -103,8 +103,7 @@ theorem erdos_577_k_one_cycle (G : SimpleGraph (Fin 4))
   rw [SimpleGraph.Walk.isCycle_iff_isPath_tail_and_le_length]
   constructor
   · rw [SimpleGraph.Walk.isPath_def]
-    simpa [p] using
-      (show ¬b = a ∧ ¬c = a ∧ ¬d = a from ⟨hab.symm, hac.symm, had.symm⟩)
+    simp [p, hab.symm, hac.symm, had.symm, hbc, hbd, hcd]
   · simp [p]
 
 /-- Canonical containment form: `G` contains a copy of `C₄`. -/
