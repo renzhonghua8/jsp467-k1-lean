@@ -1,0 +1,6 @@
+Command: lake build
+Result: exit 0
+
+✔ Built Jsp467.Erdos577
+✔ Built Jsp467
+Build completed successfully (1026 jobs).

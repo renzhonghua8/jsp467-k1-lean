@@ -1,0 +1,4 @@
+Lean: 4.34.0 (commit 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b)
+Lake: 5.0.0-src+293d5d0
+Mathlib: 5ed2965256430c3649e86755f9576b54eca72435 (tag v4.34.0)
+Host used for this local record: arm64-apple-darwin24.6.0

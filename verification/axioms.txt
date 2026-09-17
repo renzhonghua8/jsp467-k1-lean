@@ -1,0 +1,3 @@
+'Erdos577.erdos_577_k_one' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Erdos577.erdos_577_k_one_cycle' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Erdos577.erdos_577_k_one_contains_cycleGraph' depends on axioms: [propext, Classical.choice, Quot.sound]

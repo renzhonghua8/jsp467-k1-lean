@@ -11,15 +11,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Install pinned Lean toolchain
-        run: |
-          curl -sSfL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
-            | sh -s -- -y --no-modify-path
-          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
-      - name: Resolve pinned dependencies
-        run: "$HOME/.elan/bin/lake update"
-      - uses: leanprover/lean-action@v1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: leanprover/lean-action@50fcf42d2e460296f1a34b402e990d1b24f8b596 # v1.6.0
         env:
           LEAN_NUM_THREADS: "1"
         with:
@@ -34,4 +27,7 @@ jobs:
         run: lake env lean Jsp467/Audit.lean
       - name: Reject placeholders and custom axioms
         run: |
-          ! grep -RInE '(^|[^[:alnum:]_])(sorry|admit|axiom)([^[:alnum:]_]|$)' Jsp467 --include='*.lean'
+          ! grep -RInE '(^|[^[:alnum:]_])(sorry|admit|axiom|native_decide|Lean\.ofReduceBool)([^[:alnum:]_]|$)' \
+            . --include='*.lean' --exclude-dir='.lake'
+      - name: Verify release hashes
+        run: sha256sum --check verification/SHA256SUMS

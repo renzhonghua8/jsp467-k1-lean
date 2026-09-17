@@ -1,0 +1,3 @@
+Command: lake env leanchecker Jsp467
+Result: exit 0
+Standard output: empty
